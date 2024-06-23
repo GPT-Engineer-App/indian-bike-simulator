@@ -1,18 +1,43 @@
-// Update this page (the content is just a fallback if you fail and example)
-// Use chakra-ui
-import { Container, Text, VStack } from "@chakra-ui/react";
+import React, { useRef, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, useGLTF } from '@react-three/drei';
+import { Container, Box, Button } from '@chakra-ui/react';
 
-// Example of using react-icons
-// import { FaRocket } from "react-icons/fa";
-// <IconButton aria-label="Add" icon={<FaRocket />} size="lg" />; // IconButton would also have to be imported from chakra
+function Bike(props) {
+  const { nodes, materials } = useGLTF('/bike-model.glb');
+  const bikeRef = useRef();
+  const [speed, setSpeed] = useState(0);
+
+  useFrame((state, delta) => {
+    if (bikeRef.current) {
+      bikeRef.current.position.z -= speed * delta;
+    }
+  });
+
+  const handleSpeedChange = (newSpeed) => {
+    setSpeed(newSpeed);
+  };
+
+  return (
+    <group ref={bikeRef} {...props} dispose={null}>
+      <mesh geometry={nodes.Bike.geometry} material={materials.BikeMaterial} />
+      <Button onClick={() => handleSpeedChange(speed + 1)}>Accelerate</Button>
+      <Button onClick={() => handleSpeedChange(speed - 1)}>Decelerate</Button>
+    </group>
+  );
+}
 
 const Index = () => {
   return (
-    <Container centerContent maxW="container.md" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-      <VStack spacing={4}>
-        <Text fontSize="2xl">Your Blank Canvas</Text>
-        <Text>Chat with the agent to start making edits.</Text>
-      </VStack>
+    <Container centerContent maxW="container.xl" height="100vh" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+      <Box width="100%" height="80vh">
+        <Canvas>
+          <ambientLight />
+          <pointLight position={[10, 10, 10]} />
+          <Bike position={[0, 0, 0]} />
+          <OrbitControls />
+        </Canvas>
+      </Box>
     </Container>
   );
 };
